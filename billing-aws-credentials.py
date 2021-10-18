@@ -82,29 +82,11 @@ for profile in data["accounts"]:
     acc_lis.append(acc)
     #rec = {"account_id":account_id,"email":profile['email'],"previous":last_month_cost,"current":this_month_cost,"forecast":next_month_cost}
     #rec_lis.append(rec)
-
-"""
-print("test1\n")
-col_width = max(len(word) for row in acc_lis for word in row) + 2  # padding
-for row in acc_lis:
-    print ("".join(word.ljust(col_width) for word in row))
-"""
-
+    
 print("")
 with open("cost.txt", "w") as f:
     widths = [max(map(len, col)) for col in zip(*acc_lis)]
     for row in acc_lis:
         print ("  ".join((val.ljust(width) for val, width in zip(row, widths))))
         f.write ("  ".join((val.ljust(width) for val, width in zip(row, widths)))+"\n")
-
-"""
-#while open("cost.csv", 'w') as f:
-for record in acc_lis:
-    line = "\t".join(record)
-    print(line)
-"""
-
-df = pd.DataFrame(rec_lis)
-df.to_csv("cost.csv", index=False)
-
 
