@@ -55,6 +55,9 @@ previous = []
 current = []
 forecast = []
 rec_lis = []
+acc_lis = []
+
+acc_lis = [ ["account_id", "email", "previous", "current", "forecast"] ]
 
 for profile in data["accounts"]:
     print("reading profile:",profile['profile'])
@@ -72,11 +75,35 @@ for profile in data["accounts"]:
         next_month_cost = sum([float(each['MeanValue']) for each in response_f['ForecastResultsByTime'] ])
     except Exception as e:
         next_month_cost=0
-    client = boto3.client("sts")
+    #client = boto3.client("sts")
+    client = boto3.client('sts',aws_access_key_id=profile['access_key'],aws_secret_access_key=profile['secret'])
     account_id = client.get_caller_identity()["Account"]
-    rec = {"account_id":account_id,"email":profile['email'],"previous":last_month_cost,"current":this_month_cost,"forecast":next_month_cost}
-    rec_lis.append(rec)
-#print(rec_lis)
+    acc = [account_id, profile['email'], str(last_month_cost), str(this_month_cost), str(next_month_cost)]
+    acc_lis.append(acc)
+    #rec = {"account_id":account_id,"email":profile['email'],"previous":last_month_cost,"current":this_month_cost,"forecast":next_month_cost}
+    #rec_lis.append(rec)
+
+"""
+print("test1\n")
+col_width = max(len(word) for row in acc_lis for word in row) + 2  # padding
+for row in acc_lis:
+    print ("".join(word.ljust(col_width) for word in row))
+"""
+
+print("")
+with open("cost.txt", "w") as f:
+    widths = [max(map(len, col)) for col in zip(*acc_lis)]
+    for row in acc_lis:
+        print ("  ".join((val.ljust(width) for val, width in zip(row, widths))))
+        f.write ("  ".join((val.ljust(width) for val, width in zip(row, widths)))+"\n")
+
+"""
+#while open("cost.csv", 'w') as f:
+for record in acc_lis:
+    line = "\t".join(record)
+    print(line)
+"""
+
 df = pd.DataFrame(rec_lis)
 df.to_csv("cost.csv", index=False)
 
